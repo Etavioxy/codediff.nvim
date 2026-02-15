@@ -757,18 +757,23 @@ end
 function M.get_commit_list(range, git_root, opts, callback)
   opts = opts or {}
   local is_single_file = opts.path and opts.path ~= ""
+  local is_line_range = opts.line_range and is_single_file
 
   local args = {
     "log",
     "--pretty=format:%H%x00%h%x00%an%x00%at%x00%ar%x00%s%x00%D%x00",
   }
 
-  -- For single file mode, use --numstat to get stats AND file path (for renames)
-  -- For multi-file mode, use --shortstat for aggregate stats
-  if is_single_file then
+  if is_line_range then
+    -- git log -L requires -p or -s format; --numstat/--shortstat/--follow are incompatible
+    local l_arg = string.format("-L%d,%d:%s", opts.line_range[1], opts.line_range[2], opts.path)
+    table.insert(args, l_arg)
+  elseif is_single_file then
+    -- For single file mode, use --numstat to get stats AND file path (for renames)
     table.insert(args, "--numstat")
     table.insert(args, "--follow")
   else
+    -- For multi-file mode, use --shortstat for aggregate stats
     table.insert(args, "--shortstat")
   end
 
@@ -789,7 +794,8 @@ function M.get_commit_list(range, git_root, opts, callback)
     table.insert(args, range)
   end
 
-  if is_single_file then
+  -- For non-line-range single file, add -- path (line-range already includes the path in -L)
+  if is_single_file and not is_line_range then
     table.insert(args, "--")
     table.insert(args, opts.path)
   end
@@ -824,10 +830,10 @@ function M.get_commit_list(range, git_root, opts, callback)
             files_changed = 0,
             insertions = 0,
             deletions = 0,
-            file_path = nil, -- Actual file path at this commit (for --follow)
+            file_path = is_line_range and opts.path or nil,
           }
         end
-      elseif current_commit and line:match("^%d+%s+%d+%s+") then
+      elseif current_commit and not is_line_range and line:match("^%d+%s+%d+%s+") then
         -- Parse numstat line: "40\t12\tpath" or "0\t0\tlua/{old => new}/file.lua"
         local ins, del, path = line:match("^(%d+)%s+(%d+)%s+(.+)$")
         if ins and del and path then
@@ -853,7 +859,7 @@ function M.get_commit_list(range, git_root, opts, callback)
             current_commit.file_path = path
           end
         end
-      elseif current_commit and line:match("%d+ file") then
+      elseif current_commit and not is_line_range and line:match("%d+ file") then
         -- Parse shortstat line: " 3 files changed, 32 insertions(+), 8 deletions(-)"
         local files = line:match("(%d+) file")
         local ins = line:match("(%d+) insertion")
@@ -861,6 +867,15 @@ function M.get_commit_list(range, git_root, opts, callback)
         current_commit.files_changed = tonumber(files) or 0
         current_commit.insertions = tonumber(ins) or 0
         current_commit.deletions = tonumber(del) or 0
+      elseif current_commit and is_line_range then
+        -- For line-range mode, count insertions/deletions from diff lines
+        if line:match("^%+[^%+]") or (line == "+") then
+          current_commit.insertions = current_commit.insertions + 1
+          current_commit.files_changed = 1
+        elseif line:match("^%-[^%-]") or (line == "-") then
+          current_commit.deletions = current_commit.deletions + 1
+          current_commit.files_changed = 1
+        end
       end
     end
 
