@@ -82,6 +82,7 @@ M.defaults = {
       stage_hunk = "<leader>hs", -- Stage the hunk under cursor to git index
       unstage_hunk = "<leader>hu", -- Unstage the hunk under cursor from git index
       discard_hunk = "<leader>hr", -- Discard the hunk under cursor (working tree only)
+      show_help = "g?", -- Show floating window with available keymaps
     },
     explorer = {
       select = "<CR>",

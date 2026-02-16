@@ -159,6 +159,7 @@ Setup entry point:
         diff_put = "dp",
         open_in_prev_tab = "gf",
         toggle_stage = "-",
+        show_help = "g?",
       },
       explorer = {
         select = "<CR>",
@@ -196,6 +197,10 @@ CodeDiff defines highlight groups matching VSCode's diff colors:
 - CodeDiffCharInsert - deep/dark green for inserted characters
 - CodeDiffCharDelete - deep/dark red for deleted characters
 - CodeDiffFiller - gray foreground for filler line slashes (///)
+- CodeDiffHelpSection - section headings in keymap help (links to Statement)
+- CodeDiffHelpKey - key bindings in keymap help (links to Special)
+- CodeDiffHelpSep - separators in keymap help (links to NonText)
+- CodeDiffHelpDesc - descriptions in keymap help (links to Normal)
 
 Default behavior:
 - Uses DiffAdd and DiffDelete for line-level highlights
