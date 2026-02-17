@@ -3,8 +3,49 @@ local M = {}
 
 local lifecycle = require("codediff.ui.lifecycle")
 local auto_refresh = require("codediff.ui.auto_refresh")
+local config = require("codediff.config")
 
--- Common logic: Setup conflict result window at bottom
+--- Create result window at the bottom (default layout)
+--- Layout: [incoming | current] on top, [result] at bottom
+--- @param modified_win number
+--- @param original_win number
+--- @return number result_win
+local function create_bottom_layout(modified_win, original_win)
+  local scratch = vim.api.nvim_create_buf(false, true)
+  local result_win = vim.api.nvim_open_win(scratch, true, { split = "below", win = modified_win })
+
+  vim.fn.win_splitmove(original_win, modified_win, { vertical = true, rightbelow = false })
+
+  local total_height = vim.o.lines
+  local pct = config.options.diff.conflict_result_height or 30
+  local result_height = math.max(10, math.floor(total_height * pct / 100))
+  vim.api.nvim_win_set_height(result_win, result_height)
+
+  return result_win
+end
+
+--- Create result window in the center (three vertical panes side-by-side)
+--- Layout: [incoming | result | current] all side-by-side
+--- @param modified_win number
+--- @param original_win number
+--- @return number result_win
+local function create_center_layout(modified_win, original_win)
+  local orig_col = vim.api.nvim_win_get_position(original_win)[2]
+  local mod_col = vim.api.nvim_win_get_position(modified_win)[2]
+  local left_win = orig_col <= mod_col and original_win or modified_win
+
+  local scratch = vim.api.nvim_create_buf(false, true)
+  local result_win = vim.api.nvim_open_win(scratch, true, { split = "right", win = left_win })
+
+  local total_width = vim.o.columns
+  local pane_width = math.floor(total_width / 3)
+  vim.api.nvim_win_set_width(original_win, pane_width)
+  vim.api.nvim_win_set_width(result_win, pane_width)
+
+  return result_win
+end
+
+-- Common logic: Setup conflict result window
 -- Creates the result window layout and loads the real file with BASE content
 -- @param tabpage number: Current tabpage
 -- @param session_config SessionConfig: Session configuration
@@ -29,22 +70,12 @@ function M.setup_conflict_result_window(tabpage, session_config, original_win, m
 
   -- Create result window if it doesn't exist
   if not result_win then
-    if vim.api.nvim_win_is_valid(modified_win) then
-      vim.api.nvim_set_current_win(modified_win)
+    local position = config.options.diff.conflict_result_position or "bottom"
+    if position == "center" then
+      result_win = create_center_layout(modified_win, original_win)
+    else
+      result_win = create_bottom_layout(modified_win, original_win)
     end
-    vim.cmd("belowright split")
-    result_win = vim.api.nvim_get_current_win()
-
-    -- Move original window to be a vertical split with modified
-    -- rightbelow=true puts original_win to the RIGHT of modified_win
-    -- rightbelow=false puts original_win to the LEFT of modified_win
-    -- We want original_win on LEFT (consistent with normal diff), so use rightbelow=false
-    vim.fn.win_splitmove(original_win, modified_win, { vertical = true, rightbelow = false })
-
-    -- Set result window height (30% of available height or minimum 10 lines)
-    local total_height = vim.o.lines
-    local result_height = math.max(10, math.floor(total_height * 0.3))
-    vim.api.nvim_win_set_height(result_win, result_height)
   end
 
   -- Load real file buffer in result window

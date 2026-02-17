@@ -35,6 +35,8 @@ M.defaults = {
     hide_merge_artifacts = false, -- Hide merge tool temp files (*.orig, *.BACKUP.*, *.BASE.*, *.LOCAL.*, *.REMOTE.*)
     original_position = "left", -- Position of original (old) content: "left" or "right"
     conflict_ours_position = "right", -- Position of ours (:2) in conflict view: "left" or "right" (independent of original_position)
+    conflict_result_position = "bottom", -- Position of result buffer in conflict view: "bottom" or "center"
+    conflict_result_height = 30, -- Height of result buffer in bottom layout (percentage of total height, min 10 lines)
     cycle_next_hunk = true, -- Wrap around when navigating hunks (]c/[c): true = cycle, false = stop at first/last
     cycle_next_file = true, -- Wrap around when navigating files (]f/[f): true = cycle, false = stop at first/last
   },
