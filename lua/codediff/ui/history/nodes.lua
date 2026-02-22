@@ -2,8 +2,8 @@
 -- Handles commit nodes, file nodes, icons, and tree structure
 local M = {}
 
-local Tree = require("nui.tree")
-local NuiLine = require("nui.line")
+local Tree = require("codediff.ui.lib.tree")
+local NuiLine = require("codediff.ui.lib.line")
 local config = require("codediff.config")
 
 -- Status symbols and colors (reuse from explorer)

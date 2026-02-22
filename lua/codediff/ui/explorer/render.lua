@@ -1,8 +1,8 @@
 -- UI rendering for explorer (create split, tree, keymaps)
 local M = {}
 
-local Tree = require("nui.tree")
-local Split = require("nui.split")
+local Tree = require("codediff.ui.lib.tree")
+local Split = require("codediff.ui.lib.split")
 local config = require("codediff.config")
 local nodes_module = require("codediff.ui.explorer.nodes")
 local tree_module = require("codediff.ui.explorer.tree")

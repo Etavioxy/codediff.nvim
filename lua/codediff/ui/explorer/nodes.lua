@@ -2,8 +2,8 @@
 -- Handles file/directory nodes, icons, status symbols, and tree structure
 local M = {}
 
-local Tree = require("nui.tree")
-local NuiLine = require("nui.line")
+local Tree = require("codediff.ui.lib.tree")
+local NuiLine = require("codediff.ui.lib.line")
 local config = require("codediff.config")
 
 -- Merge artifact patterns (created by git mergetool)

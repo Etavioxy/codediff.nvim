@@ -1,8 +1,8 @@
 -- UI rendering for file history panel (create split, tree, keymaps)
 local M = {}
 
-local Tree = require("nui.tree")
-local Split = require("nui.split")
+local Tree = require("codediff.ui.lib.tree")
+local Split = require("codediff.ui.lib.split")
 local config = require("codediff.config")
 local git = require("codediff.core.git")
 local nodes_module = require("codediff.ui.history.nodes")

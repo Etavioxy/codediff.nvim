@@ -22,13 +22,6 @@ describe("Full Integration Suite", function()
   local commit_hash_2
 
   before_each(function()
-    -- Fix package.path which seems to be reset
-    local nui_dir = vim.fn.stdpath("data") .. "/nui.nvim"
-    nui_dir = nui_dir:gsub("\\", "/")
-    if not package.path:find(nui_dir) then
-      package.path = package.path .. ";" .. nui_dir .. "/lua/?.lua;" .. nui_dir .. "/lua/?/init.lua"
-    end
-    
     -- Setup command
     setup_command()
     
