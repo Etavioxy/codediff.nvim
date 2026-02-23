@@ -73,6 +73,7 @@ M.defaults = {
     view = {
       quit = "q", -- Close diff tab
       toggle_explorer = "<leader>b", -- Toggle explorer visibility (explorer mode only)
+      focus_explorer = "<leader>e", -- Focus explorer panel (explorer mode only)
       next_hunk = "]c",
       prev_hunk = "[c",
       next_file = "]f",

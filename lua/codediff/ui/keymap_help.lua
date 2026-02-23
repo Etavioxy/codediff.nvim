@@ -55,6 +55,7 @@ local function build_sections(keymaps, is_explorer, is_history, is_conflict)
   end
   if is_explorer then
     table.insert(view_items, { km.toggle_explorer, "Toggle explorer" })
+    table.insert(view_items, { km.focus_explorer, "Focus explorer" })
     table.insert(view_items, { km.toggle_stage, "Stage/unstage current file" })
     table.insert(view_items, { km.stage_hunk, "Stage hunk under cursor" })
     table.insert(view_items, { km.unstage_hunk, "Unstage hunk under cursor" })
