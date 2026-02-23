@@ -148,11 +148,17 @@ Setup entry point:
       file_filter = {
         ignore = { ".git/**", ".jj/**" },
       },
+      visible_groups = {
+        staged = true,
+        unstaged = true,
+        conflicts = true,
+      },
     },
     keymaps = {
       view = {
         quit = "q",
         toggle_explorer = "<leader>b",
+        focus_explorer = "<leader>e",
         next_hunk = "]c",
         prev_hunk = "[c",
         next_file = "]f",
@@ -171,6 +177,8 @@ Setup entry point:
         stage_all = "S",
         unstage_all = "U",
         restore = "X",
+        toggle_changes = "gu",
+        toggle_staged = "gs",
       },
       history = {
         select = "<CR>",

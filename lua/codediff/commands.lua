@@ -143,7 +143,6 @@ local function handle_dir_diff(dir1, dir2)
     return
   end
 
-
   ---@type SessionConfig
   local session_config = {
     mode = "explorer",
@@ -221,7 +220,6 @@ local function handle_history(range, file_path, flags, line_range)
       end
 
       vim.schedule(function()
-
         ---@type SessionConfig
         local session_config = {
           mode = "history",

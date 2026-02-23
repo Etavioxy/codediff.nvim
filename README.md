@@ -110,6 +110,11 @@ https://github.com/user-attachments/assets/64c41f01-dffe-4318-bce4-16eec8de356e
         ignore = { ".git/**", ".jj/**" },  -- Glob patterns to hide (e.g., {"*.lock", "dist/*"})
       },
       focus_on_select = false,  -- Jump to modified pane after selecting a file (default: stay in explorer)
+      visible_groups = {       -- Which groups to show (can be toggled at runtime)
+        staged = true,
+        unstaged = true,
+        conflicts = true,
+      },
     },
 
     -- History panel configuration (for :CodeDiff history)
@@ -126,6 +131,7 @@ https://github.com/user-attachments/assets/64c41f01-dffe-4318-bce4-16eec8de356e
       view = {
         quit = "q",                    -- Close diff tab
         toggle_explorer = "<leader>b",  -- Toggle explorer visibility (explorer mode only)
+        focus_explorer = "<leader>e",   -- Focus explorer panel (explorer mode only)
         next_hunk = "]c",   -- Jump to next change
         prev_hunk = "[c",   -- Jump to previous change
         next_file = "]f",   -- Next file in explorer/history mode
@@ -147,6 +153,8 @@ https://github.com/user-attachments/assets/64c41f01-dffe-4318-bce4-16eec8de356e
         stage_all = "S",    -- Stage all files
         unstage_all = "U",  -- Unstage all files
         restore = "X",      -- Discard changes (restore file)
+        toggle_changes = "gu",  -- Toggle Changes (unstaged) group visibility
+        toggle_staged = "gs",   -- Toggle Staged Changes group visibility
       },
       history = {
         select = "<CR>",    -- Select commit/file or toggle expand

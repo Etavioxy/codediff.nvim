@@ -35,6 +35,24 @@ function M.setup_all_keymaps(tabpage, original_bufnr, modified_bufnr, is_explore
     explorer.toggle_visibility(explorer_obj)
   end
 
+  -- Helper: Focus explorer panel (explorer mode only)
+  local function focus_explorer()
+    local explorer_obj = lifecycle.get_explorer(tabpage)
+    if not explorer_obj then
+      vim.notify("No explorer found for this tab", vim.log.levels.WARN)
+      return
+    end
+    local split = explorer_obj.split
+    if not split or not split.winid or not vim.api.nvim_win_is_valid(split.winid) then
+      -- Explorer is hidden, show it first then focus
+      local explorer = require("codediff.ui.explorer")
+      explorer.toggle_visibility(explorer_obj)
+    end
+    if split and split.winid and vim.api.nvim_win_is_valid(split.winid) then
+      vim.api.nvim_set_current_win(split.winid)
+    end
+  end
+
   -- Helper: Find hunk at cursor position
   -- Returns the hunk and its index, or nil if cursor is not in a hunk
   local function find_hunk_at_cursor()
@@ -579,6 +597,9 @@ function M.setup_all_keymaps(tabpage, original_bufnr, modified_bufnr, is_explore
   -- Explorer toggle (e) - only in explorer mode
   if is_explorer_mode and keymaps.toggle_explorer then
     lifecycle.set_tab_keymap(tabpage, "n", keymaps.toggle_explorer, toggle_explorer, { desc = "Toggle explorer visibility" })
+  end
+  if is_explorer_mode and keymaps.focus_explorer then
+    lifecycle.set_tab_keymap(tabpage, "n", keymaps.focus_explorer, focus_explorer, { desc = "Focus explorer panel" })
   end
 
   -- Diff get/put (do, dp) - like vimdiff

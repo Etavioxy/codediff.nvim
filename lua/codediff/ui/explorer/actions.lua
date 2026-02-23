@@ -196,6 +196,20 @@ function M.toggle_view_mode(explorer)
   vim.notify("Explorer view: " .. new_mode, vim.log.levels.INFO)
 end
 
+-- Toggle visibility of a group (staged/unstaged/conflicts)
+function M.toggle_group(explorer, group_name)
+  if not explorer or not explorer.visible_groups then
+    return
+  end
+
+  explorer.visible_groups[group_name] = not explorer.visible_groups[group_name]
+  refresh_module.refresh(explorer)
+
+  local state = explorer.visible_groups[group_name] and "shown" or "hidden"
+  local label = ({ staged = "Staged Changes", unstaged = "Changes", conflicts = "Merge Changes" })[group_name] or group_name
+  vim.notify(label .. ": " .. state, vim.log.levels.INFO)
+end
+
 -- Stage/unstage a file by path and group (lower-level function)
 -- This can be called from anywhere with explicit path and group
 -- @param git_root: git repository root

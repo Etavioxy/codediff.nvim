@@ -58,7 +58,7 @@ function M.create(status_result, git_root, tabpage, width, base_revision, target
   local selected_group = nil
 
   -- Create tree with buffer number
-  local tree_data = tree_module.create_tree_data(status_result, git_root, base_revision, is_dir_mode)
+  local tree_data = tree_module.create_tree_data(status_result, git_root, base_revision, is_dir_mode, explorer_config.visible_groups)
   local tree = Tree({
     bufnr = split.bufnr,
     nodes = tree_data,
@@ -133,6 +133,7 @@ function M.create(status_result, git_root, tabpage, width, base_revision, target
     current_file_path = nil, -- Track currently selected file
     current_file_group = nil, -- Track currently selected file's group (staged/unstaged)
     is_hidden = false, -- Track visibility state
+    visible_groups = vim.deepcopy(explorer_config.visible_groups or { staged = true, unstaged = true, conflicts = true }),
   }
 
   -- File selection callback - manages its own lifecycle

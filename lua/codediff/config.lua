@@ -57,6 +57,11 @@ M.defaults = {
       ignore = { ".git/**", ".jj/**" }, -- Glob patterns to hide (e.g., {"*.lock", "dist/*"})
     },
     focus_on_select = false, -- Jump to modified pane after selecting a file (default: stay in explorer)
+    visible_groups = { -- Which groups to show in explorer (can be toggled at runtime)
+      staged = true,
+      unstaged = true,
+      conflicts = true,
+    },
   },
 
   -- History panel configuration (for :CodeDiff history)
@@ -73,6 +78,7 @@ M.defaults = {
     view = {
       quit = "q", -- Close diff tab
       toggle_explorer = "<leader>b", -- Toggle explorer visibility (explorer mode only)
+      focus_explorer = "<leader>e", -- Focus explorer panel (explorer mode only)
       next_hunk = "]c",
       prev_hunk = "[c",
       next_file = "]f",
@@ -94,6 +100,8 @@ M.defaults = {
       stage_all = "S", -- Stage all files
       unstage_all = "U", -- Unstage all files
       restore = "X", -- Discard changes to file (restore to index/HEAD)
+      toggle_changes = "gu", -- Toggle Changes (unstaged) group visibility
+      toggle_staged = "gs", -- Toggle Staged Changes group visibility
     },
     history = {
       select = "<CR>", -- Select commit/file or toggle expand
