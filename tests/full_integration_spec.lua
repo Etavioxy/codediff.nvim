@@ -197,4 +197,54 @@ describe("Full Integration Suite", function()
     assert_explorer_opened()
   end)
 
+  -- 7. CodeDiffOpen autocmd fires on open
+  it("Fires CodeDiffOpen User autocmd", function()
+    vim.fn.writefile({"line 1", "line 2 modified", "line 3"}, temp_dir .. "/file.txt")
+
+    local event_data = nil
+    local au_id = vim.api.nvim_create_autocmd("User", {
+      pattern = "CodeDiffOpen",
+      callback = function(args)
+        event_data = args.data
+      end,
+    })
+
+    vim.cmd("CodeDiff")
+    assert_explorer_opened()
+
+    assert.is_not_nil(event_data, "CodeDiffOpen should fire")
+    assert.equal("explorer", event_data.mode, "Mode should be explorer")
+    assert.is_not_nil(event_data.tabpage, "tabpage should be set")
+
+    vim.api.nvim_del_autocmd(au_id)
+  end)
+
+  -- 8. CodeDiffClose autocmd fires on close
+  it("Fires CodeDiffClose User autocmd", function()
+    vim.fn.writefile({"line 1", "line 2 modified", "line 3"}, temp_dir .. "/file.txt")
+
+    -- Ensure lifecycle autocmds are set up (TabClosed handler)
+    require("codediff.ui.lifecycle").setup()
+
+    local close_data = nil
+    local au_id = vim.api.nvim_create_autocmd("User", {
+      pattern = "CodeDiffClose",
+      callback = function(args)
+        close_data = args.data
+      end,
+    })
+
+    vim.cmd("CodeDiff")
+    assert_explorer_opened()
+
+    -- Close via tabclose (triggers TabClosed autocmd -> cleanup_diff)
+    vim.cmd("tabclose")
+    vim.wait(2000, function() return close_data ~= nil end)
+
+    assert.is_not_nil(close_data, "CodeDiffClose should fire")
+    assert.equal("explorer", close_data.mode, "Mode should be explorer")
+
+    vim.api.nvim_del_autocmd(au_id)
+  end)
+
 end)

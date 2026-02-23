@@ -463,6 +463,59 @@ git.get_git_root("/path/to/file.lua", function(err, git_root)
 end)
 ```
 
+### User Autocmd Events
+
+CodeDiff emits `User` autocmd events at key lifecycle points, allowing you to customize behavior without config flags:
+
+| Event | When | Data |
+|-------|------|------|
+| `CodeDiffOpen` | After diff view is fully ready | `tabpage`, `mode` |
+| `CodeDiffClose` | Before cleanup starts | `tabpage`, `mode` |
+| `CodeDiffFileSelect` | When a file is selected in explorer | `tabpage`, `path`, `status` |
+
+`mode` is one of `"explorer"`, `"standalone"`, or `"history"`.
+
+<details>
+<summary>Example: Disable cursorline in diff windows</summary>
+
+```lua
+vim.api.nvim_create_autocmd("User", {
+  pattern = "CodeDiffOpen",
+  callback = function()
+    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
+      vim.wo[win].cursorline = false
+    end
+  end,
+})
+```
+
+</details>
+
+<details>
+<summary>Example: Hide tabline while CodeDiff is open</summary>
+
+```lua
+vim.api.nvim_create_autocmd("User", {
+  pattern = "CodeDiffOpen",
+  callback = function()
+    vim.g.codediff_saved_showtabline = vim.o.showtabline
+    vim.o.showtabline = 0
+  end,
+})
+vim.api.nvim_create_autocmd("User", {
+  pattern = "CodeDiffClose",
+  callback = function()
+    if vim.g.codediff_saved_showtabline then
+      vim.o.showtabline = vim.g.codediff_saved_showtabline
+      vim.g.codediff_saved_showtabline = nil
+    end
+  end,
+})
+```
+
+</details>
+```
+
 ## Architecture
 
 ### Components

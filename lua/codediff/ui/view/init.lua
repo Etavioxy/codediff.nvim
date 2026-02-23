@@ -472,6 +472,16 @@ function M.create(session_config, filetype, on_ready)
     setup_all_keymaps(tabpage, original_info.bufnr, modified_info.bufnr, false)
   end
 
+  -- Emit CodeDiffOpen User autocmd
+  vim.api.nvim_exec_autocmds("User", {
+    pattern = "CodeDiffOpen",
+    modeline = false,
+    data = {
+      tabpage = tabpage,
+      mode = session_config.mode,
+    },
+  })
+
   return {
     original_buf = original_info.bufnr,
     modified_buf = modified_info.bufnr,

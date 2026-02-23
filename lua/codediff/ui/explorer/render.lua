@@ -146,6 +146,17 @@ function M.create(status_result, git_root, tabpage, width, base_revision, target
     local old_path = file_data.old_path -- For renames: path in original revision
     local group = file_data.group or "unstaged"
 
+    -- Emit CodeDiffFileSelect User autocmd
+    vim.api.nvim_exec_autocmds("User", {
+      pattern = "CodeDiffFileSelect",
+      modeline = false,
+      data = {
+        tabpage = tabpage,
+        path = file_path,
+        status = file_data.status,
+      },
+    })
+
     -- Dir mode: Compare files from dir1 vs dir2 (no git)
     if is_dir_mode then
       local original_path = explorer.dir1 .. "/" .. file_path

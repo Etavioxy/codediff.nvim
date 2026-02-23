@@ -251,6 +251,47 @@ Advanced usage (internal modules):
 <
 
 ==============================================================================
+USER AUTOCMD EVENTS                                     *codediff-events*
+
+CodeDiff emits User autocmd events at key lifecycle points:
+
+*CodeDiffOpen*    Fired after the diff view is fully ready.
+*CodeDiffClose*   Fired before cleanup starts.
+*CodeDiffFileSelect*  Fired when a file is selected in explorer.
+
+All events pass a `data` table accessible via the autocmd callback's
+`args.data` field:
+
+  CodeDiffOpen / CodeDiffClose:
+    `tabpage`   Tab page ID of the diff session.
+    `mode`      One of "explorer", "standalone", or "history".
+
+  CodeDiffFileSelect:
+    `tabpage`   Tab page ID of the diff session.
+    `path`      Relative file path selected.
+    `status`    Git status code (e.g., "M", "A", "D").
+
+Example: Hide tabline while CodeDiff is open:
+>lua
+  vim.api.nvim_create_autocmd("User", {
+    pattern = "CodeDiffOpen",
+    callback = function()
+      vim.g.codediff_saved_showtabline = vim.o.showtabline
+      vim.o.showtabline = 0
+    end,
+  })
+  vim.api.nvim_create_autocmd("User", {
+    pattern = "CodeDiffClose",
+    callback = function()
+      if vim.g.codediff_saved_showtabline then
+        vim.o.showtabline = vim.g.codediff_saved_showtabline
+        vim.g.codediff_saved_showtabline = nil
+      end
+    end,
+  })
+<
+
+==============================================================================
 SEE ALSO                                                *codediff-see-also*
 
 README.md for full installation, build, and development details.

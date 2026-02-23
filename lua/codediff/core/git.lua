@@ -950,29 +950,25 @@ end
 -- rel_path: current relative path of the file
 -- callback: function(err, resolved_path)
 function M.resolve_path_at_revision(revision, git_root, rel_path, callback)
-  run_git_async(
-    { "log", "--follow", "--diff-filter=RC", "--format=", "--name-status", revision .. "..HEAD", "--", rel_path },
-    { cwd = git_root },
-    function(err, output)
-      if err or not output or output == "" then
-        callback(nil, rel_path)
+  run_git_async({ "log", "--follow", "--diff-filter=RC", "--format=", "--name-status", revision .. "..HEAD", "--", rel_path }, { cwd = git_root }, function(err, output)
+    if err or not output or output == "" then
+      callback(nil, rel_path)
+      return
+    end
+
+    -- Parse name-status output (last rename/copy entry gives the original name)
+    -- Format: "R100\told_path\tnew_path" or "C096\told_path\tnew_path"
+    local lines = vim.split(vim.trim(output), "\n")
+    for i = #lines, 1, -1 do
+      local old_path = lines[i]:match("^[RC]%d*\t(.-)\t")
+      if old_path then
+        callback(nil, old_path)
         return
       end
-
-      -- Parse name-status output (last rename/copy entry gives the original name)
-      -- Format: "R100\told_path\tnew_path" or "C096\told_path\tnew_path"
-      local lines = vim.split(vim.trim(output), "\n")
-      for i = #lines, 1, -1 do
-        local old_path = lines[i]:match("^[RC]%d*\t(.-)\t")
-        if old_path then
-          callback(nil, old_path)
-          return
-        end
-      end
-
-      callback(nil, rel_path)
     end
-  )
+
+    callback(nil, rel_path)
+  end)
 end
 
 -- Get revision candidates for command completion (sync)
