@@ -458,9 +458,10 @@ static bool are_lines_similar(const char *line1, const char *line2, MoveTimeout 
 
   // Build char sequences for Myers diff
   // VSCode: new LinesSliceCharSequence([line1], new Range(1,1,1,line1.length), false)
-  // We create ISequence wrappers using char_sequence_create for single lines
-  CharRange r1 = {1, 1, 1, len1 + 1};
-  CharRange r2 = {1, 1, 1, len2 + 1};
+  // Note: VSCode uses line.length as endCol (1-based column), which truncates by 1 char
+  // compared to the full trimmed line. We must replicate this exactly.
+  CharRange r1 = {1, 1, 1, len1};
+  CharRange r2 = {1, 1, 1, len2};
   const char *lines1[1] = {line1};
   const char *lines2[1] = {line2};
   ISequence *seq1 = char_sequence_create_from_range(lines1, 1, &r1, false);
@@ -491,12 +492,7 @@ static bool are_lines_similar(const char *line1, const char *line2, MoveTimeout 
   }
 
   SequenceDiffArray *diffs;
-  int total = s1len + s2len;
-  if (total < 500) {
-    diffs = myers_dp_diff_algorithm(seq1, seq2, remaining_ms, &hit_timeout, NULL, NULL);
-  } else {
-    diffs = myers_nd_diff_algorithm(seq1, seq2, remaining_ms, &hit_timeout);
-  }
+  diffs = myers_nd_diff_algorithm(seq1, seq2, remaining_ms, &hit_timeout);
 
   if (!diffs) {
     seq1->destroy(seq1);
@@ -505,24 +501,26 @@ static bool are_lines_similar(const char *line1, const char *line2, MoveTimeout 
   }
 
   // Invert diffs to get matching regions (SequenceDiff.invert)
-  // Then count common non-space chars
+  // VSCode quirk: invert uses line1.length (original string length) as doc1Length,
+  // not seq1.length. The counting loop then uses line1.charCodeAt(idx) on the
+  // original string. This means matching regions extend beyond the sequence and
+  // the index-to-character mapping is offset by trimmed whitespace. We replicate
+  // this exactly for parity.
   int common_non_space = 0;
   int prev_end = 0;
   for (int i = 0; i < diffs->count; i++) {
     int match_start = prev_end;
     int match_end = diffs->diffs[i].seq1_start;
     for (int idx = match_start; idx < match_end; idx++) {
-      uint32_t ch = seq1->getElement(seq1, idx);
-      if (!is_space((unsigned char)ch)) {
+      if (idx < len1 && !is_space((unsigned char)line1[idx])) {
         common_non_space++;
       }
     }
     prev_end = diffs->diffs[i].seq1_end;
   }
-  // Last matching segment
-  for (int idx = prev_end; idx < s1len; idx++) {
-    uint32_t ch = seq1->getElement(seq1, idx);
-    if (!is_space((unsigned char)ch)) {
+  // Last matching segment — extends to len1 (line1.length), not s1len
+  for (int idx = prev_end; idx < len1; idx++) {
+    if (!is_space((unsigned char)line1[idx])) {
       common_non_space++;
     }
   }
