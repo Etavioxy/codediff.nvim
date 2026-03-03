@@ -9,7 +9,6 @@
 // All thresholds and logic match VSCode exactly.
 // ============================================================================
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -700,12 +699,26 @@ static void compute_unchanged_moves(const DetailedLineRangeMapping *changes, int
   SetMap original3;
   setmap_init(&original3);
 
-  char key_buf[128];
+  // Helper: write a uint32 as decimal into buf, return chars written
+  #define WRITE_U32(buf, pos, val) do { \
+    unsigned _v = (unsigned)(val); \
+    char _tmp[11]; int _n = 0; \
+    if (_v == 0) { _tmp[_n++] = '0'; } \
+    else { while (_v) { _tmp[_n++] = '0' + (_v % 10); _v /= 10; } } \
+    for (int _j = _n - 1; _j >= 0; _j--) (buf)[(pos)++] = _tmp[_j]; \
+  } while (0)
+
+  char key_buf[64];
   for (int ci = 0; ci < change_count; ci++) {
     LineRange orig = changes[ci].original;
     for (int i = orig.start_line; i < orig.end_line - 2; i++) {
-      snprintf(key_buf, sizeof(key_buf), "%u:%u:%u", hashed_original[i - 1], hashed_original[i],
-               hashed_original[i + 1]);
+      int pos = 0;
+      WRITE_U32(key_buf, pos, hashed_original[i - 1]);
+      key_buf[pos++] = ':';
+      WRITE_U32(key_buf, pos, hashed_original[i]);
+      key_buf[pos++] = ':';
+      WRITE_U32(key_buf, pos, hashed_original[i + 1]);
+      key_buf[pos] = '\0';
       setmap_add(&original3, key_buf, lr_new(i, i + 3));
     }
   }
@@ -736,8 +749,13 @@ static void compute_unchanged_moves(const DetailedLineRangeMapping *changes, int
     last_count = 0;
 
     for (int i = mod.start_line; i < mod.end_line - 2; i++) {
-      snprintf(key_buf, sizeof(key_buf), "%u:%u:%u", hashed_modified[i - 1], hashed_modified[i],
-               hashed_modified[i + 1]);
+      int pos = 0;
+      WRITE_U32(key_buf, pos, hashed_modified[i - 1]);
+      key_buf[pos++] = ':';
+      WRITE_U32(key_buf, pos, hashed_modified[i]);
+      key_buf[pos++] = ':';
+      WRITE_U32(key_buf, pos, hashed_modified[i + 1]);
+      key_buf[pos] = '\0';
       LineRange current_mod = lr_new(i, i + 3);
 
       next_count = 0;
