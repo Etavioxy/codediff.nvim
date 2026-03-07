@@ -44,6 +44,8 @@ function M.setup_auto_refresh(explorer, tabpage)
       -- Only refresh if tabpage still exists and explorer is visible
       if vim.api.nvim_tabpage_is_valid(tabpage) and not explorer.is_hidden then
         M.refresh(explorer)
+        local auto_refresh = require("codediff.ui.auto_refresh")
+        auto_refresh.sync_mutable_buffers(tabpage)
       end
       refresh_timer = nil
     end)
@@ -328,14 +330,15 @@ function M.refresh(explorer)
         end
 
         if found_file then
-          -- File still exists (possibly in a new group) — re-select it
+          -- Re-select current file — on_file_select guard handles deduplication
+          -- Pass no_jump to preserve cursor position (this is a refresh, not user click)
           explorer.on_file_select({
             path = found_file.path,
             old_path = found_file.old_path,
             status = found_file.status,
             git_root = explorer.git_root,
             group = found_group,
-          })
+          }, { no_jump = true })
         else
           -- File was committed/removed — show welcome
           clear_current_file()

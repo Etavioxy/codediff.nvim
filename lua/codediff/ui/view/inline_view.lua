@@ -237,9 +237,8 @@ function M.create(session_config, filetype, on_ready)
 
       mark_inline(tabpage)
 
-      if not modified_is_virtual then
-        auto_refresh.enable(modified_info.bufnr)
-      end
+      auto_refresh.enable(original_info.bufnr)
+      auto_refresh.enable(modified_info.bufnr)
 
       setup_keymaps(tabpage, original_info.bufnr, modified_info.bufnr)
 
@@ -336,10 +335,11 @@ function M.update(tabpage, session_config, auto_scroll_to_first_hunk)
     return false
   end
 
-  -- Disable auto-refresh and clear old highlights
+  -- Disable auto-refresh and clear old highlights from ALL namespaces.
+  -- ns_highlight/ns_filler may linger after toggling from side-by-side.
   if old_modified_buf and vim.api.nvim_buf_is_valid(old_modified_buf) then
     auto_refresh.disable(old_modified_buf)
-    inline.clear(old_modified_buf)
+    lifecycle.clear_highlights(old_modified_buf)
   end
 
   lifecycle.update_diff_result(tabpage, nil)
@@ -402,9 +402,8 @@ function M.update(tabpage, session_config, auto_scroll_to_first_hunk)
       lifecycle.update_changedtick(tabpage, vim.api.nvim_buf_get_changedtick(orig_buf), vim.api.nvim_buf_get_changedtick(mod_buf))
       lifecycle.update_paths(tabpage, session_config.original_path or "", session_config.modified_path or "")
 
-      if not modified_is_virtual then
-        auto_refresh.enable(mod_buf)
-      end
+      auto_refresh.enable(orig_buf)
+      auto_refresh.enable(mod_buf)
 
       setup_keymaps(tabpage, orig_buf, mod_buf)
       layout.arrange(tabpage)
