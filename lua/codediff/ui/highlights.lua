@@ -170,7 +170,7 @@ function M.setup()
   })
 
   vim.api.nvim_set_hl(0, "CodeDiffExplorerTreeGroup", {
-    link = "Exception",
+    link = "Directory",
     default = true,
   })
 
