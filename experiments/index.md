@@ -11,6 +11,7 @@
 | 05-virtual-buffer-naming-scheme | buffer命名方案影响filetype高亮 | 文本片段buffer如何命名 |
 | 06-realtime-rematching | 文件改动后重新匹配机制 | 缓存失效策略和重新匹配时机 |
 | 07-buffer-writeback | buffer保存时写回原文件 | 写回前检测变动、写回后重新定位 |
+| 08-buffer-writeback-accumulated-error | 多次连续写回累积误差验证 | 每次写回后重新定位是否准确 |
 
 ## 完成状态
 
