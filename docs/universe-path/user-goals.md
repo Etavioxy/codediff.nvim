@@ -7,5 +7,5 @@
 
 ## 开发位置
 
-- **正确位置**：`~/projects/codediff-universe-path/`（独立开发目录）
+- **正确位置**：`D:\Project\bloominginthemud\codediff-universe-path\`（独立开发目录）
 - **错误位置**：`AppData/Local/nvim-data/lazy/codediff.nvim/`（lazy管理，会被清理）
